@@ -10,5 +10,7 @@ If there's one thing you take away from this document *Don't guess, measure. The
 
 # ressources
 
+- [Brendan Greg - Home Page and Books](https://www.brendangregg.com/)
+- [Daniel Lemire - Home Page and Papers](https://lemire.me/blog/)
 - [Damian Gryski - Go Perf Book](https://github.com/dgryski/go-perfbook)
-- [Brendan Greg's Home Page and Books](https://www.brendangregg.com/)
+- [Sergey Slotin - Algorithms for Modern Hardware](https://en.algorithmica.org/hpc/)
