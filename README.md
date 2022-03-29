@@ -39,22 +39,21 @@ defer summary.mu.Unlock()
 
 for _, row := range data {
   for _, item := range row {
-    if item.Type == Potatoes {
-      summary.add_type(Potatoes)
+    if item.Type == Potatos {
+      summary.add_type(Potatos)
     } else {
-      summary.add_type(NotPotatoes)
+      summary.add_type(NotPotatos)
     }
   }
 }
 
 ```
 
-Look "not clever" by Go standards, except if you have 10 million rows with 20 rows and maybe
-you're doing more than sorting through potatoes.
+Looks "not clever" by Go standards, except if you have 10 million rows and 20 columns and maybe
+you're doing more than sorting through potatos.
 
-A "clever" individual might notice the amenability of this operation to parallelism (using
-concurrency of course so it's like random parallelisim with extra steps) and the individual
-might pull a [mapreduce]() on it.
+One might notice the amenability of this operation to parallelism,(using concurrency of course 
+so it's like random parallelism with extra steps and the you might pull a [mapreduce]() on it.
 
 ```go
 
@@ -62,10 +61,10 @@ data := sourceReader.Read()
 
 processRow := func(row *Row) rowSummary {
   for _,item := range row {
-    if item.Type == Potatoes {
-      rowSummary.add_type(Potatoes)
+    if item.Type == Potatos {
+      rowSummary.add_type(Potatos)
     } else {
-      rowSummary.add_type(NotPotatoes)
+      rowSummary.add_type(NotPotatos)
     }
   }
 }
