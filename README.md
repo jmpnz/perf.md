@@ -11,7 +11,7 @@ If there's one thing you take away from this document *Don't guess, measure. The
 ## Reach for low hanging fruits
 
 One of the hallmarks of software optimization is trying to rewrite core parts of an application
-either by redesigning it or sometimes going for the extreme of [rewriting it in rust]().
+either by redesigning it or sometimes going for the extreme of [rewriting it in rust](https://discord.com/blog/why-discord-is-switching-from-go-to-rust).
 
 Whatever you pick, as long as it works it's a good option. But sometimes, you want to start easy
 you've just got a ticket "Application slow make fast pls" and crunching a couple of weeks on a
@@ -21,80 +21,7 @@ One thing to do is to go through the basics, look for hotpaths, refactor hotpath
 hotpaths.
 
 In the simplest case the goal here is to shave a few seconds, you can do it by adjusting preallocations
-avoid the [accidental O(n^2)]() but you should avoid doing any refactoring or redesigns.
-
-But the most troubling optimizations to untangle is the ones where you're [locking]() especially
-in batch jobs.
-
-One time while looking at some code, I noticed an interesting case of a very long lock.
-Upon further investigation it turned out the batch job was concurrent (supposedly) but because
-of the lock, the trace profile showed the goroutine were running sequentially.
-
-```go
-
-data := sourceReader.Read()
-
-summary.mu.Lock()
-defer summary.mu.Unlock()
-
-for _, row := range data {
-  for _, item := range row {
-    if item.Type == Potatos {
-      summary.add_type(Potatos)
-    } else {
-      summary.add_type(NotPotatos)
-    }
-  }
-}
-
-```
-
-Looks "not clever" by Go standards, except if you have 10 million rows and 20 columns and maybe
-you're doing more than sorting through potatos.
-
-One might notice the amenability of this operation to parallelism,(using concurrency of course 
-so it's like random parallelism with extra steps and the you might pull a [mapreduce]() on it.
-
-```go
-
-data := sourceReader.Read()
-
-processRow := func(row *Row) rowSummary {
-  for _,item := range row {
-    if item.Type == Potatos {
-      rowSummary.add_type(Potatos)
-    } else {
-      rowSummary.add_type(NotPotatos)
-    }
-  }
-}
-
-// lock the append
-summaries := []rowSummary
-
-for _,row := range data {
-  summary := go processRow(row[:n])
-  summaries = append(summaries, summary)
-  }
-}
-
-```
-
-Of course in a real world setting you need context handling a better way to do the "reduce"
-probably with a [lock-free queue]() and a few sprinkles of logging, error handling et al.
-
-In real life, this change reduced one of my batch jobs duration from 7 minutes on a 25GB dataset
-to approximately 1m19sec.
-
-Of course the numbers you need to collect should be bias free (different profiles have different times)
-for reasons such as heat, background jobs, I/O utilization, I/O speed...
-
-Avoiding loading the data in memory in one Go and doing async Reads with a buffer might even improve
-performance.
-
-For a batch job, where there's no data dependency a MapReduce should be your first pick, it might not
-appear to be performant at first sight, but MapReduce is scalable and scalability is where performance
-matter.
+avoid the [accidental O(n^2)](https://accidentallyquadratic.tumblr.com/) but you should avoid doing any refactoring or redesigns.
 
 # ressources
 
