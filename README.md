@@ -112,7 +112,7 @@ for _,item := range items {
 
 If you have two goroutines filtering through two lists of items in a shared cache, the first
 executing goroutine will hold a lock for the entire iteration when the lock is only needed
-for incrementing the counter.
+for increment operation.
 
 Look at your code, are your goroutines suffering from lock contention due to a simplistic quote ?
 
