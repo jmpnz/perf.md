@@ -3,26 +3,10 @@
 This is a collection of notes on software performance, optimizations and mistakes
 I learned over the years.
 
-While there are several great [ressources](#ressources) you can read, this one tries
-to be pragmatic and focus on a few rules of thumbs and heuristics.
+While there are several great [resources](#resources) you can read, this one tries
+to be pragmatic with a particular focus towards software design. 
 
 If there's one thing you take away from this document *Don't guess, measure. Then measure it again.*.
-
-## Reach for low hanging fruits
-
-One of the hallmarks of software optimization is trying to rewrite core parts of an application
-either by redesigning it or sometimes going for the extreme of [rewriting it in rust](https://discord.com/blog/why-discord-is-switching-from-go-to-rust).
-
-Whatever you pick, as long as it works it's a good option. But sometimes, you want to start easy
-you've just got a ticket "Application slow make fast pls" and crunching a couple of weeks on a
-redesign and reimplementation is probably not an option.
-
-One thing to do is to go through the basics, look for hotpaths, refactor hotpaths, look for other
-hotpaths.
-
-In the simplest case the goal here is to shave a few seconds, you can do it by adjusting preallocations
-avoid the [accidental O(n^2)](https://accidentallyquadratic.tumblr.com/), and more importantly stay
-sane.
 
 ## Beyond all those numbers you were told you needed to know.
 
@@ -73,10 +57,20 @@ hotpaths of your application.
 But then you add up how many records you're processing, the complexity of your computation and the
 difference between a lock and no-lock becomes in the seconds.
 
+## Reach for low hanging fruits
+
+One of the hallmarks of software optimization is trying to rewrite core parts of an application
+either by redesigning it or sometimes going for the extreme of [rewriting it in rust](https://discord.com/blog/why-discord-is-switching-from-go-to-rust).
+
+In the simplest case the goal here is to shave a few seconds, you can do it by adjusting preallocations
+avoid the [accidental O(n^2)](https://accidentallyquadratic.tumblr.com/), and more importantly stay
+sane.
+
+### Granular Locks in Go ( `defer` considered harmful)
+
 This is quite popular in Golang applications, take a look at this snippet from [Kubernetes's
 code](https://github.com/kubernetes/kubernetes/blob/6609899398d35d22a7482f687ed05fb19093b762/staging/src/k8s.io/client-go/plugin/pkg/client/auth/exec/metrics.go#L69)
 
-The famous 
 
 ```go
 
@@ -96,7 +90,7 @@ when you're locking the code for the entire computation.
 
 In the example above the ressource will be locked for the entire computation, in this case
 the cost is small but if your iteration takes time to run and the only *critical ressource*
-is the cache, then using more granular locks is also faster.
+is the cache, then using more granular locks **will always be faster**.
 
 ```go
 
@@ -115,6 +109,7 @@ executing goroutine will hold a lock for the entire iteration when the lock is o
 for increment operation.
 
 Look at your code, are your goroutines suffering from lock contention due to a simplistic quote ?
+
 
 # ressources
 
